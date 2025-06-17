@@ -1,26 +1,34 @@
-name: Run Telegram Bot
+name: Deploy Website to GitHub Pages
 
 on:
-  workflow_dispatch:  # позволяет запускать вручную с GitHub
+  push:
+    branches:
+      - main  # или master, если у тебя так называется ветка
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: "pages"
+  cancel-in-progress: true
 
 jobs:
-  run-bot:
+  deploy:
     runs-on: ubuntu-latest
 
-    env:
-      BOT_TOKEN: ${{ secrets.BOT_TOKEN }}
-
     steps:
-    - name: Checkout repo
+    - name: Checkout source code
       uses: actions/checkout@v4
 
-    - name: Установка Python
-      uses: actions/setup-python@v5
+    - name: Setup Pages
+      uses: actions/configure-pages@v4
+
+    - name: Upload site files
+      uses: actions/upload-pages-artifact@v3
       with:
-        python-version: '3.11'
+        path: 'site'  # ✅ путь к папке с сайтом
 
-    - name: Установка зависимостей
-      run: pip install python-telegram-bot
-
-    - name: Запуск бота
-      run: python bot.py
+    - name: Deploy to GitHub Pages
+      uses: actions/deploy-pages@v4
